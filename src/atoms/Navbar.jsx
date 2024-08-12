@@ -44,11 +44,13 @@ const Navbar = () => {
   const [textInputs, setTextInputs] = useState({
     header: {
       text: "",
-      x: 120,
-      y: 50,
+      x: 20,
+      y: 40,
       width: 150,
       height: 40,
       fontSize: 24,
+      color: "white",
+      bold: false,
       visible: true,
     },
     body: {
@@ -58,6 +60,8 @@ const Navbar = () => {
       width: 150,
       height: 40,
       fontSize: 18,
+      color: "white",
+      bold: false,
       visible: true,
     },
     caption: {
@@ -67,6 +71,8 @@ const Navbar = () => {
       width: 150,
       height: 40,
       fontSize: 16,
+      color: "white",
+      bold: false,
       visible: true,
     },
   });
@@ -78,10 +84,13 @@ const Navbar = () => {
     }));
   };
 
-  const handleTextStyleChange = (styleType, value) => {
-    setTextStyle((prevState) => ({
+  const handleTextStyleChange = (styleType, value, key) => {
+    setTextInputs((prevState) => ({
       ...prevState,
-      [styleType]: value,
+      [key]: {
+        ...prevState[key],
+        [styleType]: value,
+      },
     }));
   };
 
@@ -197,10 +206,12 @@ const Navbar = () => {
           Object.keys(textInputs).forEach((key) => {
             const textInput = textInputs[key];
             if (textInput.visible) {
-              ctx.font = `${textStyle.bold ? "bold" : "normal"} ${
-                textStyle.fontSize || "16"
+              ctx.save();
+              ctx.filter = "none";
+              ctx.font = `${textInput.bold ? "bold" : "normal"} ${
+                textInput.fontSize || "16"
               }px Arial`;
-              ctx.fillStyle = textStyle.color || "white";
+              ctx.fillStyle = textInput.color || "white";
               (activeTextInput.header ||
                 activeTextInput.body ||
                 activeTextInput.caption) &&
@@ -324,6 +335,7 @@ const Navbar = () => {
           activeTextInput={activeTextInput}
           handleTextStyleChange={handleTextStyleChange}
           handleImageUpload={handleImageUpload}
+          setTextInputs={setTextInputs}
         />
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 const Sidebar = ({
   handleDownload,
@@ -10,7 +10,41 @@ const Sidebar = ({
   activeTextInput,
   handleTextStyleChange,
   handleImageUpload,
+  setTextInputs,
 }) => {
+  const [selectedTextArea, setSelectedTextArea] = useState("header");
+
+  const resetTextInputs = () => {
+    setTextInputs({
+      header: {
+        fontSize: 24,
+        color: "white",
+        bold: false,
+        x: 20,
+        y: 40,
+      },
+      body: {
+        fontSize: 20,
+        color: "#white",
+        bold: false,
+        x: 20,
+        y: 40,
+      },
+      caption: {
+        fontSize: 16,
+        color: "#white",
+        bold: false,
+        x: 20,
+        y: 40,
+      },
+    });
+  };
+
+  const handleSocialMediaChange = (e) => {
+    setSelectedSocialMedia(e.target.value);
+    resetTextInputs();
+  };
+
   return (
     <div className="w-1/4 bg-gray-200 p-4 border-l border-gray-300">
       <div className="flex justify-center items-center my-4">
@@ -26,13 +60,29 @@ const Sidebar = ({
       </div>
       <div className="p-4 bg-gray-100">
         <div>
+          <label>Select Text Area:</label>
+          <select
+            value={selectedTextArea}
+            onChange={(e) => setSelectedTextArea(e.target.value)}
+            className="mb-4 w-full p-2 border border-gray-300 rounded"
+          >
+            <option value="header">Header</option>
+            <option value="body">Body</option>
+            <option value="caption">Caption</option>
+          </select>
+        </div>
+        <div>
           <label>Font Size:</label>
           <input
             type="number"
             min="10"
             max="100"
             onChange={(e) =>
-              handleTextStyleChange("fontSize", parseInt(e.target.value))
+              handleTextStyleChange(
+                "fontSize",
+                parseInt(e.target.value),
+                selectedTextArea
+              )
             }
           />
         </div>
@@ -40,22 +90,27 @@ const Sidebar = ({
           <label>Text Color:</label>
           <input
             type="color"
-            onChange={(e) => handleTextStyleChange("color", e.target.value)}
+            onChange={(e) =>
+              handleTextStyleChange("color", e.target.value, selectedTextArea)
+            }
           />
         </div>
         <div>
           <label>Bold:</label>
           <input
             type="checkbox"
-            onChange={(e) => handleTextStyleChange("bold", e.target.checked)}
+            onChange={(e) =>
+              handleTextStyleChange("bold", e.target.checked, selectedTextArea)
+            }
           />
         </div>
         {/* Existing sidebar content */}
       </div>
+
       <h2 className="text-lg mb-2">Social Media Options</h2>
       <select
         value={selectedSocialMedia}
-        onChange={(e) => setSelectedSocialMedia(e.target.value)}
+        onChange={handleSocialMediaChange}
         className="mb-4 w-full p-2 border border-gray-300 rounded"
       >
         <option value="instagram">Instagram</option>
@@ -68,7 +123,7 @@ const Sidebar = ({
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="block w-full p-2 border border-gray-300 rounded"
+          className="block w-full p-2 border border-gray-300 rounded z-0"
         >
           <option value="none">None</option>
           <option value="grayscale(100%)">Grayscale</option>

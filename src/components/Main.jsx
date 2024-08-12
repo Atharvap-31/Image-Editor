@@ -181,11 +181,11 @@ const Main = ({
                       onResize={(e, data) => handleResize(e, data, key)}
                     >
                       <TextareaAutosize
-                        className="absolute top-10 left-0 w-full h-full flex items-center justify-center bg-transparent border border-white"
+                        className="absolute top-10 left-0 w-full h-full flex items-center justify-center bg-transparent border z-40 border-white"
                         style={{
-                          fontSize: `${textStyle.fontSize}px`,
-                          color: textStyle.color || "white",
-                          fontWeight: textStyle.bold ? "bold" : "normal",
+                          fontSize: textInputs[key]?.fontSize || "16px",
+                          color: textInputs[key]?.color || "white",
+                          fontWeight: textInputs[key]?.bold ? "bold" : "normal",
                           pointerEvents: "auto",
                           zIndex: 2,
                           textAlign: "center",
@@ -193,10 +193,8 @@ const Main = ({
                           whiteSpace: "normal",
                           wordWrap: "break-word",
                         }}
-                        value={textInputs[key].text}
-                        onChange={(e) => {
-                          handleTextChange(key, [e.target.value]);
-                        }}
+                        value={textInputs[key]?.text || ""}
+                        onChange={(e) => handleTextChange(key, e.target.value)}
                         minRows={1}
                         maxRows={10}
                       />
