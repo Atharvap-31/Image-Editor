@@ -1,28 +1,51 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaAngleDown } from "react-icons/fa";
 import { saveAs } from "file-saver";
 import Main from "../components/Main";
 import Sidebar from "./Sidebar";
 import { IMAGES, RESOLUTIONS } from "../utility/constant";
+import { getRandomPhotos } from "../axios";
 
 const Navbar = () => {
   const [showImages, setShowImages] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedSocialMedia, setSelectedSocialMedia] = useState("instagram");
+
   const [filter, setFilter] = useState("none");
   const [croppedImage, setCroppedImage] = useState(null);
   const [activeTextInput, setActiveTextInput] = useState({
-    header: true,
-    body: true,
-    caption: true,
+    header: false,
+    body: false,
+    caption: false,
   });
+
+  const [textStyle, setTextStyle] = useState({
+    fontSize: 24,
+    color: "white",
+    bold: false,
+  });
+  const [imageUrls, setImageUrls] = useState([]);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const images = await getRandomPhotos();
+        setImageUrls(images.map((image) => image.urls.small));
+      } catch (error) {
+        console.error("Error fetching images from Unsplash", error);
+      }
+    };
+
+    fetchImages();
+  }, []);
+
   const cropperRef = useRef(null);
 
   const [textInputs, setTextInputs] = useState({
     header: {
       text: "",
-      x: 20,
-      y: 40,
+      x: 120,
+      y: 50,
       width: 150,
       height: 40,
       fontSize: 24,
@@ -31,18 +54,18 @@ const Navbar = () => {
     body: {
       text: "",
       x: 20,
-      y: 0,
+      y: 40,
       width: 150,
-      height: 30,
+      height: 40,
       fontSize: 18,
       visible: true,
     },
     caption: {
       text: "",
       x: 20,
-      y: 20,
+      y: 40,
       width: 150,
-      height: 30,
+      height: 40,
       fontSize: 16,
       visible: true,
     },
@@ -55,16 +78,21 @@ const Navbar = () => {
     }));
   };
 
+  const handleTextStyleChange = (styleType, value) => {
+    setTextStyle((prevState) => ({
+      ...prevState,
+      [styleType]: value,
+    }));
+  };
+
   const handleDownload = () => {
     if (selectedImage && selectedSocialMedia) {
       fetch(selectedImage)
         .then((response) => response.blob())
         .then((blob) => createImageFromBlob(blob))
         .then((image) => {
-          // Retrieve resolution from the selected social media
           const { width, height } = RESOLUTIONS[selectedSocialMedia];
 
-          // Create a canvas with the selected resolution
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
           canvas.width = width;
@@ -72,17 +100,13 @@ const Navbar = () => {
 
           const cropper = cropperRef.current?.cropper;
           if (cropper) {
-            // Get the cropped box details
-            const cropBoxData = cropper.getCropBoxData();
             const cropData = cropper.getData();
 
-            // Calculate the source dimensions and offsets
             const sx = cropData.x;
             const sy = cropData.y;
             const sWidth = cropData.width;
             const sHeight = cropData.height;
 
-            // Calculate aspect ratio and adjust image dimensions
             const imageAspectRatio = sWidth / sHeight;
             let newWidth, newHeight;
             let xOffset, yOffset;
@@ -98,7 +122,6 @@ const Navbar = () => {
             xOffset = (width - newWidth) / 2;
             yOffset = (height - newHeight) / 2;
 
-            // Clear canvas and draw cropped image centered
             ctx.clearRect(0, 0, width, height);
             ctx.drawImage(
               image,
@@ -112,7 +135,6 @@ const Navbar = () => {
               newHeight
             );
 
-            // Apply filter if any
             if (filter) {
               ctx.filter = filter;
               ctx.drawImage(
@@ -128,7 +150,6 @@ const Navbar = () => {
               );
             }
           } else {
-            // No cropper instance, draw the full image
             const imageAspectRatio = image.width / image.height;
             let newWidth, newHeight;
             let xOffset, yOffset;
@@ -144,7 +165,6 @@ const Navbar = () => {
             xOffset = (width - newWidth) / 2;
             yOffset = (height - newHeight) / 2;
 
-            // Clear canvas and draw full image centered
             ctx.clearRect(0, 0, width, height);
             ctx.drawImage(
               image,
@@ -158,7 +178,6 @@ const Navbar = () => {
               newHeight
             );
 
-            // Apply filter if any
             if (filter) {
               ctx.filter = filter;
               ctx.drawImage(
@@ -175,17 +194,33 @@ const Navbar = () => {
             }
           }
 
-          // Draw text if enabled
-          Object.keys(activeTextInput).forEach((key) => {
-            if (activeTextInput[key] && textInputs[key].visible) {
-              const textInput = textInputs[key];
-              ctx.font = `${textInput.fontSize}px Arial`;
-              ctx.fillStyle = "white";
-              ctx.fillText(textInput.text, textInput.x, textInput.y);
+          Object.keys(textInputs).forEach((key) => {
+            const textInput = textInputs[key];
+            if (textInput.visible) {
+              ctx.font = `${textStyle.bold ? "bold" : "normal"} ${
+                textStyle.fontSize || "16"
+              }px Arial`;
+              ctx.fillStyle = textStyle.color || "white";
+              (activeTextInput.header ||
+                activeTextInput.body ||
+                activeTextInput.caption) &&
+                ctx.fillText(
+                  textInput.text,
+                  RESOLUTIONS.instagram
+                    ? textInput.x + 50
+                    : RESOLUTIONS.pinterest
+                    ? textInput.x + 55
+                    : RESOLUTIONS.facebook && textInput.x + 10,
+                  RESOLUTIONS.instagram
+                    ? textInput.y + textStyle.fontSize + 40
+                    : RESOLUTIONS.pinterest
+                    ? textInput.y + textStyle.fontSize + 100
+                    : RESOLUTIONS.facebook &&
+                      textInput.y + textStyle.fontSize + 100
+                );
             }
           });
 
-          // Convert canvas to blob and trigger download
           canvas.toBlob((blob) => {
             if (blob) {
               saveAs(blob, `image-${selectedSocialMedia}.png`);
@@ -214,6 +249,18 @@ const Navbar = () => {
     });
   };
 
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedImage(reader.result);
+        setCroppedImage(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="flex flex-col">
       <div className="relative">
@@ -233,7 +280,7 @@ const Navbar = () => {
             onMouseLeave={() => setShowImages(false)}
             className={`absolute top-[60px] left-1/2 transform -translate-x-1/2 w-[1300px] h-52 bg-white p-4 rounded shadow-lg flex justify-center items-center overflow-x-scroll z-20`}
           >
-            {IMAGES.map((image, i) => (
+            {imageUrls.map((image, i) => (
               <img
                 key={i}
                 src={image}
@@ -243,7 +290,6 @@ const Navbar = () => {
                 }`}
                 onClick={() => {
                   setSelectedImage(image);
-
                   setCroppedImage(null);
                 }}
               />
@@ -264,6 +310,8 @@ const Navbar = () => {
             textInputs={textInputs}
             setTextInputs={setTextInputs}
             cropperRef={cropperRef}
+            textStyle={textStyle}
+            resolution={RESOLUTIONS}
           />
         </div>
         <Sidebar
@@ -271,9 +319,11 @@ const Navbar = () => {
           handleTextInputToggle={handleTextInputToggle}
           setSelectedSocialMedia={setSelectedSocialMedia}
           selectedSocialMedia={selectedSocialMedia}
-          filter={filter}
           setFilter={setFilter}
+          filter={filter}
           activeTextInput={activeTextInput}
+          handleTextStyleChange={handleTextStyleChange}
+          handleImageUpload={handleImageUpload}
         />
       </div>
     </div>

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Draggable from "react-draggable";
 import { ResizableBox } from "react-resizable";
 import Demo from "./Demo";
+import TextareaAutosize from "react-textarea-autosize";
 
 const Main = ({
   selectedImage,
@@ -13,6 +14,8 @@ const Main = ({
   textInputs,
   setTextInputs,
   cropperRef,
+  textStyle,
+  resolution,
 }) => {
   const [isCropping, setIsCropping] = useState(false);
   const [canvasDimensions, setCanvasDimensions] = useState({
@@ -26,12 +29,6 @@ const Main = ({
   useEffect(() => {
     const { width, height } = getCanvasDimensions();
     setCanvasDimensions({ width, height });
-
-    setTextInputs((prevState) => ({
-      header: { ...prevState.header, x: 10, y: 10 },
-      body: { ...prevState.body, x: 10, y: 0 },
-      caption: { ...prevState.caption, x: 10, y: 0 },
-    }));
   }, [selectedSocialMedia]);
 
   useEffect(() => {
@@ -40,7 +37,14 @@ const Main = ({
     } else {
       renderImage(selectedImage);
     }
-  }, [selectedImage, filter, canvasDimensions, croppedImage, textInputs]);
+  }, [
+    selectedImage,
+    filter,
+    canvasDimensions,
+    croppedImage,
+    textInputs,
+    textStyle,
+  ]);
 
   const getCanvasDimensions = () => {
     switch (selectedSocialMedia) {
@@ -62,44 +66,30 @@ const Main = ({
     img.src = imageSrc;
 
     img.onload = () => {
-      const containerWidth = canvasDimensions.width;
-      const containerHeight = canvasDimensions.height;
+      const { width, height } = canvasDimensions;
 
-      canvas.width = containerWidth;
-      canvas.height = containerHeight;
+      canvas.width = width;
+      canvas.height = height;
 
-      ctx.clearRect(0, 0, containerWidth, containerHeight);
+      ctx.clearRect(0, 0, width, height);
 
+      // Set image and filter properties
       const aspectRatio = img.width / img.height;
       let newWidth, newHeight;
 
-      if (aspectRatio > containerWidth / containerHeight) {
-        newHeight = containerHeight;
-        newWidth = aspectRatio * containerHeight;
+      if (aspectRatio > width / height) {
+        newHeight = height;
+        newWidth = aspectRatio * height;
       } else {
-        newWidth = containerWidth;
-        newHeight = containerWidth / aspectRatio;
+        newWidth = width;
+        newHeight = width / aspectRatio;
       }
 
-      const xOffset = (containerWidth - newWidth) / 2;
-      const yOffset = (containerHeight - newHeight) / 2;
+      const xOffset = (width - newWidth) / 2;
+      const yOffset = (height - newHeight) / 2;
 
       ctx.filter = filter;
       ctx.drawImage(img, xOffset, yOffset, newWidth, newHeight);
-
-      // Apply text inputs
-      Object.entries(textInputs).forEach(([key, input]) => {
-        if (input.visible) {
-          ctx.font =
-            key === "header"
-              ? "bold 24px Arial"
-              : key === "body"
-              ? "18px Arial"
-              : "italic 16px Arial";
-          ctx.fillStyle = "white";
-          ctx.fillText(input.text, input.x, input.y);
-        }
-      });
     };
   };
 
@@ -124,38 +114,26 @@ const Main = ({
   };
 
   const handleDrag = (e, data, key) => {
-    const newX = Math.max(
-      0,
-      Math.min(data.x, canvasDimensions.width - textInputs[key].width)
-    );
-    const newY = Math.max(
-      0,
-      Math.min(data.y, canvasDimensions.height - textInputs[key].height)
-    );
-
-    setTextInputs((prevState) => ({
-      ...prevState,
-      [key]: { ...prevState[key], x: newX, y: newY },
-    }));
-  };
-
-  const handleResize = (event, { size }, key) => {
-    const newWidth = Math.min(size.width, canvasDimensions.width);
-    const newHeight = Math.min(size.height, canvasDimensions.height);
-
     setTextInputs((prevState) => ({
       ...prevState,
       [key]: {
         ...prevState[key],
-        width: newWidth,
-        height: newHeight,
-        x: Math.min(prevState[key].x, canvasDimensions.width - newWidth),
-        y: Math.min(prevState[key].y, canvasDimensions.height - newHeight),
+        x: data.x,
+        y: data.y,
       },
     }));
   };
 
-  const resolution = getCanvasDimensions();
+  const handleResize = (event, { size }, key) => {
+    setTextInputs((prevState) => ({
+      ...prevState,
+      [key]: {
+        ...prevState[key],
+        width: data.size.width,
+        height: data.size.height,
+      },
+    }));
+  };
 
   return (
     <div>
@@ -183,7 +161,7 @@ const Main = ({
           </button>
           <canvas ref={canvasRef} className="w-full h-full" />
           <div
-            className="absolute top-10 bottom-0 left-0 w-full h-full"
+            className="absolute top-0 bottom-0 left-0 w-full h-full"
             style={{ pointerEvents: "none", zIndex: 1 }}
           >
             {Object.keys(textInputs).map(
@@ -202,24 +180,26 @@ const Main = ({
                       maxConstraints={[canvasDimensions.width, 100]}
                       onResize={(e, data) => handleResize(e, data, key)}
                     >
-                      <div
-                        className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-transparent border border-dashed border-white"
+                      <TextareaAutosize
+                        className="absolute top-10 left-0 w-full h-full flex items-center justify-center bg-transparent border border-white"
                         style={{
-                          fontSize: `${textInputs[key].fontSize}px`,
-                          color: "white",
+                          fontSize: `${textStyle.fontSize}px`,
+                          color: textStyle.color || "white",
+                          fontWeight: textStyle.bold ? "bold" : "normal",
                           pointerEvents: "auto",
                           zIndex: 2,
-                          lineHeight: `${textInputs[key].fontSize}px`,
                           textAlign: "center",
+                          overflow: "hidden",
+                          whiteSpace: "normal",
+                          wordWrap: "break-word",
                         }}
-                        contentEditable
-                        suppressContentEditableWarning
-                        onInput={(e) =>
-                          handleTextChange(key, e.currentTarget.textContent)
-                        }
-                      >
-                        {textInputs[key].text}
-                      </div>
+                        value={textInputs[key].text}
+                        onChange={(e) => {
+                          handleTextChange(key, [e.target.value]);
+                        }}
+                        minRows={1}
+                        maxRows={10}
+                      />
                     </ResizableBox>
                   </Draggable>
                 )

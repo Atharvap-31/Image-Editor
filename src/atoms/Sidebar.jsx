@@ -8,9 +8,50 @@ const Sidebar = ({
   filter,
   setFilter,
   activeTextInput,
+  handleTextStyleChange,
+  handleImageUpload,
 }) => {
   return (
     <div className="w-1/4 bg-gray-200 p-4 border-l border-gray-300">
+      <div className="flex justify-center items-center my-4">
+        <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded">
+          Upload Image
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+        </label>
+      </div>
+      <div className="p-4 bg-gray-100">
+        <div>
+          <label>Font Size:</label>
+          <input
+            type="number"
+            min="10"
+            max="100"
+            onChange={(e) =>
+              handleTextStyleChange("fontSize", parseInt(e.target.value))
+            }
+          />
+        </div>
+        <div>
+          <label>Text Color:</label>
+          <input
+            type="color"
+            onChange={(e) => handleTextStyleChange("color", e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Bold:</label>
+          <input
+            type="checkbox"
+            onChange={(e) => handleTextStyleChange("bold", e.target.checked)}
+          />
+        </div>
+        {/* Existing sidebar content */}
+      </div>
       <h2 className="text-lg mb-2">Social Media Options</h2>
       <select
         value={selectedSocialMedia}

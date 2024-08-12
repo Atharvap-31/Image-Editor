@@ -52,16 +52,15 @@ const Demo = ({
   const getAspectRatio = () => {
     switch (selectedSocialMedia) {
       case "instagram":
-        return 1; // Square
+        return 400 / 300;
       case "pinterest":
-        return 1000 / 1500; // Vertical
+        return 400 / 450;
       case "facebook":
-        return 4 / 3; // Horizontal
+        return 500 / 250;
       default:
         return 16 / 9;
     }
   };
-
   const handleCropData = () => {
     const cropper = cropperRef.current?.cropper;
     if (cropper) {
