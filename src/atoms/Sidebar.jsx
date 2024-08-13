@@ -40,6 +40,8 @@ const Sidebar = ({
         fontSize: 16,
         color: "#white",
         bold: false,
+        width: 150,
+        height: 40,
         x: 20,
         y: 40,
         visible: true,
