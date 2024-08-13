@@ -214,7 +214,7 @@ const Navbar = () => {
             const textInput = textInputs[key];
             if (textInput.visible) {
               ctx.save();
-              // ctx.filter = "none";
+              ctx.filter = "none";
               ctx.font = `${textInput.bold ? "bold" : "normal"} ${
                 textInput.fontSize || "16"
               }px Arial`;
