@@ -17,7 +17,7 @@ const Main = ({
   textStyle,
   resolution,
 }) => {
-  const [isCropping, setIsCropping] = useState(false);
+  const [isCropping, setIsCropping] = newFunction();
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: 300,
     height: 300,
@@ -124,7 +124,7 @@ const Main = ({
     }));
   };
 
-  const handleResize = (event, { size }, key) => {
+  const handleResize = (key) => {
     setTextInputs((prevState) => ({
       ...prevState,
       [key]: {
@@ -136,7 +136,7 @@ const Main = ({
   };
 
   return (
-    <div>
+    <div className="w-full">
       {isCropping ? (
         <Demo
           selectedImage={selectedImage}
@@ -181,7 +181,7 @@ const Main = ({
                       onResize={(e, data) => handleResize(e, data, key)}
                     >
                       <TextareaAutosize
-                        className="absolute top-10 left-0 w-full h-full flex items-center justify-center bg-transparent border z-40 border-white"
+                        className="absolute top-10 left-0s w-full h-full flex items-center justify-center bg-transparent border border-white"
                         style={{
                           fontSize: textInputs[key]?.fontSize || "16px",
                           color: textInputs[key]?.color || "white",
@@ -207,6 +207,10 @@ const Main = ({
       )}
     </div>
   );
+
+  function newFunction() {
+    return useState(false);
+  }
 };
 
 export default Main;

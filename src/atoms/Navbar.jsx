@@ -4,13 +4,13 @@ import { saveAs } from "file-saver";
 import Main from "../components/Main";
 import Sidebar from "./Sidebar";
 import { IMAGES, RESOLUTIONS } from "../utility/constant";
-import { getRandomPhotos } from "../axios";
+import { getMorePhotos, getRandomPhotos, searchUnsplashImages } from "../axios";
 
 const Navbar = () => {
   const [showImages, setShowImages] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedSocialMedia, setSelectedSocialMedia] = useState("instagram");
-
+  const [filteredImageUrls, setFilteredImageUrls] = useState([]);
   const [filter, setFilter] = useState("none");
   const [croppedImage, setCroppedImage] = useState(null);
   const [activeTextInput, setActiveTextInput] = useState({
@@ -18,19 +18,23 @@ const Navbar = () => {
     body: false,
     caption: false,
   });
-
+  const [searchResults, setSearchResults] = useState([]);
   const [textStyle, setTextStyle] = useState({
     fontSize: 24,
     color: "white",
     bold: false,
   });
+
   const [imageUrls, setImageUrls] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const images = await getRandomPhotos();
-        setImageUrls(images.map((image) => image.urls.small));
+        const images = await getMorePhotos();
+
+        setImageUrls(images);
+        setFilteredImageUrls(images);
       } catch (error) {
         console.error("Error fetching images from Unsplash", error);
       }
@@ -44,13 +48,11 @@ const Navbar = () => {
   const [textInputs, setTextInputs] = useState({
     header: {
       text: "",
-      x: 20,
-      y: 40,
+      x: 120,
+      y: 50,
       width: 150,
       height: 40,
       fontSize: 24,
-      color: "white",
-      bold: false,
       visible: true,
     },
     body: {
@@ -60,8 +62,6 @@ const Navbar = () => {
       width: 150,
       height: 40,
       fontSize: 18,
-      color: "white",
-      bold: false,
       visible: true,
     },
     caption: {
@@ -71,11 +71,18 @@ const Navbar = () => {
       width: 150,
       height: 40,
       fontSize: 16,
-      color: "white",
-      bold: false,
       visible: true,
     },
   });
+
+  const handleSearch = async () => {
+    if (searchTerm.trim() !== "") {
+      const results = await searchUnsplashImages(searchTerm);
+      setFilteredImageUrls(results);
+    } else {
+      setFilteredImageUrls(imageUrls);
+    }
+  };
 
   const handleTextInputToggle = (inputName) => {
     setActiveTextInput((prevState) => ({
@@ -94,7 +101,7 @@ const Navbar = () => {
     }));
   };
 
-  const handleDownload = () => {
+  const handleDownload = (format) => {
     if (selectedImage && selectedSocialMedia) {
       fetch(selectedImage)
         .then((response) => response.blob())
@@ -207,7 +214,7 @@ const Navbar = () => {
             const textInput = textInputs[key];
             if (textInput.visible) {
               ctx.save();
-              ctx.filter = "none";
+              // ctx.filter = "none";
               ctx.font = `${textInput.bold ? "bold" : "normal"} ${
                 textInput.fontSize || "16"
               }px Arial`;
@@ -221,7 +228,7 @@ const Navbar = () => {
                     ? textInput.x + 50
                     : RESOLUTIONS.pinterest
                     ? textInput.x + 55
-                    : RESOLUTIONS.facebook && textInput.x + 10,
+                    : RESOLUTIONS.facebook && textInput.x + 80,
                   RESOLUTIONS.instagram
                     ? textInput.y + textStyle.fontSize + 40
                     : RESOLUTIONS.pinterest
@@ -234,11 +241,11 @@ const Navbar = () => {
 
           canvas.toBlob((blob) => {
             if (blob) {
-              saveAs(blob, `image-${selectedSocialMedia}.png`);
+              saveAs(blob, `image-${selectedSocialMedia}.${format}`);
             } else {
               alert("Failed to generate the image.");
             }
-          }, "image/png");
+          }, `image/${format}`);
         })
         .catch((error) => {
           console.error("Error during download:", error);
@@ -289,12 +296,12 @@ const Navbar = () => {
           <div
             onMouseEnter={() => setShowImages(true)}
             onMouseLeave={() => setShowImages(false)}
-            className={`absolute top-[60px] left-1/2 transform -translate-x-1/2 w-[1300px] h-52 bg-white p-4 rounded shadow-lg flex justify-center items-center overflow-x-scroll z-20`}
+            className="absolute top-[60px] left-1/2 transform -translate-x-1/2 w-[1300px] h-52 bg-white p-4 rounded shadow-lg flex justify-center items-center overflow-x-scroll z-20"
           >
-            {imageUrls.map((image, i) => (
+            {IMAGES?.map((image, i) => (
               <img
                 key={i}
-                src={image}
+                src={image.url}
                 alt={`Image ${i + 1}`}
                 className={`w-32 h-32 object-cover mr-2 cursor-pointer ${
                   selectedImage === image && "border-4 border-blue-500"
@@ -309,21 +316,59 @@ const Navbar = () => {
         )}
       </div>
 
-      <div className="flex flex-1">
+      <div className="flex flex1">
         <div className="flex-1 flex flex-col">
-          <Main
-            selectedImage={selectedImage}
-            selectedSocialMedia={selectedSocialMedia}
-            filter={filter}
-            activeTextInput={activeTextInput}
-            setCroppedImage={setCroppedImage}
-            croppedImage={croppedImage}
-            textInputs={textInputs}
-            setTextInputs={setTextInputs}
-            cropperRef={cropperRef}
-            textStyle={textStyle}
-            resolution={RESOLUTIONS}
-          />
+          <div className="flex ">
+            <div className="flex flex-col p-4 w-[300px]">
+              <h2 className="text-lg mb-2">Images</h2>
+              <div className="mb-4">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search Images"
+                  className="w-full p-2 border-b border-gray-300"
+                />
+                <button
+                  onClick={handleSearch}
+                  className="px-5 py-2 mt-2 bg-blue-500 text-white rounded-lg"
+                >
+                  Search
+                </button>
+              </div>
+              <div className="flex flex-col space-y-2 overflow-y-scroll h-[500px]">
+                {filteredImageUrls?.map((image, i) => (
+                  <img
+                    key={i}
+                    src={image.urls.small}
+                    alt={`Image ${i + 1}`}
+                    className={`w-32 h-32 object-cover mr-2 cursor-pointer ${
+                      selectedImage === image && "border-4 border-blue-500"
+                    }`}
+                    onClick={() => {
+                      setSelectedImage(image.urls.small);
+                      setCroppedImage(null);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="flex-1 flex flex-col">
+              <Main
+                selectedImage={selectedImage}
+                selectedSocialMedia={selectedSocialMedia}
+                filter={filter}
+                activeTextInput={activeTextInput}
+                setCroppedImage={setCroppedImage}
+                croppedImage={croppedImage}
+                textInputs={textInputs}
+                setTextInputs={setTextInputs}
+                cropperRef={cropperRef}
+                textStyle={textStyle}
+                resolution={RESOLUTIONS}
+              />
+            </div>
+          </div>
         </div>
         <Sidebar
           handleDownload={handleDownload}
@@ -336,6 +381,7 @@ const Navbar = () => {
           handleTextStyleChange={handleTextStyleChange}
           handleImageUpload={handleImageUpload}
           setTextInputs={setTextInputs}
+          textInputs={textInputs}
         />
       </div>
     </div>

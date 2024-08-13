@@ -13,29 +13,36 @@ const Sidebar = ({
   setTextInputs,
 }) => {
   const [selectedTextArea, setSelectedTextArea] = useState("header");
+  const [selectedFormat, setSelectedFormat] = useState("png");
 
   const resetTextInputs = () => {
     setTextInputs({
       header: {
+        text: "",
+        x: 120,
+        y: 50,
+        width: 150,
+        height: 40,
         fontSize: 24,
-        color: "white",
-        bold: false,
-        x: 20,
-        y: 40,
+        visible: true,
       },
       body: {
-        fontSize: 20,
-        color: "#white",
-        bold: false,
+        text: "",
         x: 20,
         y: 40,
+        width: 150,
+        height: 40,
+        fontSize: 18,
+        visible: true,
       },
       caption: {
+        text: "",
         fontSize: 16,
         color: "#white",
         bold: false,
         x: 20,
         y: 40,
+        visible: true,
       },
     });
   };
@@ -46,7 +53,7 @@ const Sidebar = ({
   };
 
   return (
-    <div className="w-1/4 bg-gray-200 p-4 border-l border-gray-300">
+    <div className="ml-auto bg-gray-200 p-4 border-l border-gray-300">
       <div className="flex justify-center items-center my-4">
         <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded">
           Upload Image
@@ -134,6 +141,19 @@ const Sidebar = ({
         </select>
       </div>
 
+      <div className="mt-4">
+        <h2 className="text-lg mb-2">Download Format</h2>
+        <select
+          value={selectedFormat}
+          onChange={(e) => setSelectedFormat(e.target.value)}
+          className="mb-4 w-full p-2 border border-gray-300 rounded"
+        >
+          <option value="png">PNG</option>
+          <option value="jpeg">JPEG</option>
+          <option value="webp">WEBP</option>
+        </select>
+      </div>
+
       <div className="flex flex-col mt-5">
         <button
           onClick={() => handleTextInputToggle("header")}
@@ -149,7 +169,7 @@ const Sidebar = ({
             activeTextInput.body ? "bg-green-500" : "bg-gray-500"
           } text-white rounded`}
         >
-          {activeTextInput.body ? " Disable Body" : "Enable Body"}
+          {activeTextInput.body ? "Disable Body" : "Enable Body"}
         </button>
         <button
           onClick={() => handleTextInputToggle("caption")}
@@ -160,8 +180,9 @@ const Sidebar = ({
           {activeTextInput.caption ? " Disable Caption" : "Enable Caption"}
         </button>
       </div>
+
       <button
-        onClick={handleDownload}
+        onClick={() => handleDownload(selectedFormat)}
         className="p-2 w-full my-10 bg-green-500 text-white rounded"
       >
         Download
