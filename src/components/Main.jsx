@@ -8,6 +8,8 @@ const Main = ({
   selectedImage,
   selectedSocialMedia,
   filter,
+  isCropping,
+  setIsCropping,
   activeTextInput,
   setCroppedImage,
   croppedImage,
@@ -15,9 +17,9 @@ const Main = ({
   setTextInputs,
   cropperRef,
   textStyle,
+  onSelectImage,
   resolution,
 }) => {
-  const [isCropping, setIsCropping] = newFunction();
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: 300,
     height: 300,
@@ -144,21 +146,25 @@ const Main = ({
           selectedSocialMedia={selectedSocialMedia}
           resolution={resolution}
           cropperRef={cropperRef}
+          isCropping={isCropping}
+          setIsCropping={setIsCropping}
         />
       ) : (
         <div
           ref={containerRef}
-          className="relative mx-auto border mt-4 w-[350px] bg-white"
+          className="relative mx-auto border mt-4 w-[350px] bg-white rounded-lg"
         >
-          <button
-            className={`bg-red-500 p-2 rounded-lg ${
-              !selectedImage && "cursor-not-allowed"
-            }`}
-            onClick={handleCropButtonClick}
-            disabled={!selectedImage}
-          >
-            Reposition
-          </button>
+          <div className="flex justify-end">
+            <button
+              className={`bg-gray-100 m-2 p-2 rounded-lg ${
+                !selectedImage && "cursor-not-allowed"
+              }`}
+              onClick={handleCropButtonClick}
+              disabled={!selectedImage}
+            >
+              Reposition
+            </button>
+          </div>
           <canvas ref={canvasRef} className="w-full h-full" />
           <div
             className="absolute top-0 bottom-0 left-0 w-full h-full"
@@ -207,10 +213,6 @@ const Main = ({
       )}
     </div>
   );
-
-  function newFunction() {
-    return useState(false);
-  }
 };
 
 export default Main;

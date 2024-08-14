@@ -8,6 +8,8 @@ const Demo = ({
   selectedSocialMedia,
   resolution,
   cropperRef,
+  isCropping,
+  setIsCropping,
 }) => {
   const [image, setImage] = useState(selectedImage);
   const [zoom, setZoom] = useState(0);
@@ -129,6 +131,12 @@ const Demo = ({
             onClick={handleCropData}
           >
             Done
+          </button>
+          <button
+            className="bg-red-500 p-2 rounded-lg text-white"
+            onClick={() => setIsCropping(false)}
+          >
+            Cancel
           </button>
         </div>
       </div>

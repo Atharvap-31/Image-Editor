@@ -81,7 +81,7 @@ const Sidebar = ({
           </select>
         </div>
         <div>
-          <label>Font Size:</label>
+          <label>Font Size : </label>
           <input
             type="number"
             min="10"
@@ -96,7 +96,7 @@ const Sidebar = ({
           />
         </div>
         <div>
-          <label>Text Color:</label>
+          <label>Text Color : </label>
           <input
             type="color"
             onChange={(e) =>
@@ -105,7 +105,7 @@ const Sidebar = ({
           />
         </div>
         <div>
-          <label>Bold:</label>
+          <label>Bold : </label>
           <input
             type="checkbox"
             onChange={(e) =>
@@ -113,7 +113,6 @@ const Sidebar = ({
             }
           />
         </div>
-        {/* Existing sidebar content */}
       </div>
 
       <h2 className="text-lg mb-2">Social Media Options</h2>

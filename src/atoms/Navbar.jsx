@@ -18,13 +18,12 @@ const Navbar = () => {
     body: false,
     caption: false,
   });
-  const [searchResults, setSearchResults] = useState([]);
   const [textStyle, setTextStyle] = useState({
     fontSize: 24,
     color: "white",
     bold: false,
   });
-
+  const [isCropping, setIsCropping] = useState();
   const [imageUrls, setImageUrls] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -279,6 +278,11 @@ const Navbar = () => {
     }
   };
 
+  const handleImageSelect = (image) => {
+    setSelectedImage(image);
+    setIsCropping(true);
+  };
+
   return (
     <div className="flex flex-col">
       <div className="relative">
@@ -304,7 +308,8 @@ const Navbar = () => {
                 src={image.urls.small}
                 alt={`Image ${i + 1}`}
                 className={`w-32 h-32 object-cover mr-2 cursor-pointer ${
-                  selectedImage === image && "border-4 border-blue-500"
+                  selectedImage === image.urls.small &&
+                  "border-4 border-blue-500"
                 }`}
                 onClick={() => {
                   setSelectedImage(image.urls.small);
@@ -342,8 +347,9 @@ const Navbar = () => {
                     key={i}
                     src={image.urls.small}
                     alt={`Image ${i + 1}`}
-                    className={`w-32 h-32 object-cover mr-2 cursor-pointer ${
-                      selectedImage === image && "border-4 border-blue-500"
+                    className={`w-56 h-56 object-cover mr-2 cursor-pointer ${
+                      selectedImage === image.urls.small &&
+                      "border-4 border-blue-500"
                     }`}
                     onClick={() => {
                       setSelectedImage(image.urls.small);
@@ -358,6 +364,8 @@ const Navbar = () => {
                 selectedImage={selectedImage}
                 selectedSocialMedia={selectedSocialMedia}
                 filter={filter}
+                isCropping={isCropping}
+                setIsCropping={setIsCropping}
                 activeTextInput={activeTextInput}
                 setCroppedImage={setCroppedImage}
                 croppedImage={croppedImage}
@@ -365,6 +373,7 @@ const Navbar = () => {
                 setTextInputs={setTextInputs}
                 cropperRef={cropperRef}
                 textStyle={textStyle}
+                onSelectImage={handleImageSelect}
                 resolution={RESOLUTIONS}
               />
             </div>
@@ -374,6 +383,8 @@ const Navbar = () => {
           handleDownload={handleDownload}
           handleTextInputToggle={handleTextInputToggle}
           setSelectedSocialMedia={setSelectedSocialMedia}
+          isCropping={isCropping}
+          setIsCropping={setIsCropping}
           selectedSocialMedia={selectedSocialMedia}
           setFilter={setFilter}
           filter={filter}
