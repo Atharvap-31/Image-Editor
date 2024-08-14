@@ -59,36 +59,3 @@ export const fetchPhotos = async () => {
   }
   return [];
 };
-
-// const handleSearch = () => {
-//   if (searchTerm.trim() === "") {
-//     setFilteredImageUrls(imageUrls);
-//   } else {
-//     const filteredImages = imageUrls.filter(
-//       (image) =>
-//         image.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//         image.description.toLowerCase().includes(searchTerm.toLowerCase())
-//     );
-//     setFilteredImageUrls(filteredImages);
-//   }
-// };
-
-// useEffect(() => {
-//   const fetchImages = async () => {
-//     try {
-//       const images = await getMorePhotos();
-
-//       const formattedImages = images.map((image) => ({
-//         url: image.urls.small,
-//         description: image.description || image.alt_description || "",
-//       }));
-
-//       setImageUrls(formattedImages);
-//       setFilteredImageUrls(formattedImages);
-//     } catch (error) {
-//       console.error("Error fetching images from Unsplash", error);
-//     }
-//   };
-
-//   fetchImages();
-// }, []);
