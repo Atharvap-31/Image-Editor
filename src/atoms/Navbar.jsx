@@ -307,7 +307,7 @@ const Navbar = () => {
                   selectedImage === image && "border-4 border-blue-500"
                 }`}
                 onClick={() => {
-                  setSelectedImage(image);
+                  setSelectedImage(image.urls.small);
                   setCroppedImage(null);
                 }}
               />
