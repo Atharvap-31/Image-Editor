@@ -181,7 +181,7 @@ const Main = ({
                       onResize={(e, data) => handleResize(e, data, key)}
                     >
                       <TextareaAutosize
-                        className="absolute top-10 left-0s w-full h-full flex items-center justify-center bg-transparent border border-white"
+                        className="absolute top-10 left-0 w-full h-full flex items-center justify-center bg-transparent border border-white"
                         style={{
                           fontSize: textInputs[key]?.fontSize || "16px",
                           color: textInputs[key]?.color || "white",

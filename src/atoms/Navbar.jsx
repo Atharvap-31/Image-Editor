@@ -298,10 +298,10 @@ const Navbar = () => {
             onMouseLeave={() => setShowImages(false)}
             className="absolute top-[60px] left-1/2 transform -translate-x-1/2 w-[1300px] h-52 bg-white p-4 rounded shadow-lg flex justify-center items-center overflow-x-scroll z-20"
           >
-            {IMAGES?.map((image, i) => (
+            {filteredImageUrls?.map((image, i) => (
               <img
                 key={i}
-                src={image.url}
+                src={image.urls.small}
                 alt={`Image ${i + 1}`}
                 className={`w-32 h-32 object-cover mr-2 cursor-pointer ${
                   selectedImage === image && "border-4 border-blue-500"
